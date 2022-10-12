@@ -129,15 +129,6 @@
 
 class AdafruitIO_MQTT; // forward decl
 
-// Function pointer that returns an int
-typedef void (*SubscribeCallbackUInt32Type)(uint32_t);
-// returns a double
-typedef void (*SubscribeCallbackDoubleType)(double);
-// returns a chunk of raw data
-typedef void (*SubscribeCallbackBufferType)(char *str, uint16_t len);
-// returns an io data wrapper instance
-typedef void (AdafruitIO_MQTT::*SubscribeCallbackIOType)(char *str,
-                                                         uint16_t len);
 
 extern void printBuffer(uint8_t *buffer, uint16_t len);
 
@@ -299,11 +290,6 @@ public:
   Adafruit_MQTT_Subscribe(Adafruit_MQTT *mqttserver, const char *feedname,
                           uint8_t q = 0);
 
-  void setCallback(SubscribeCallbackUInt32Type callb);
-  void setCallback(SubscribeCallbackDoubleType callb);
-  void setCallback(SubscribeCallbackBufferType callb);
-  void setCallback(AdafruitIO_MQTT *io, SubscribeCallbackIOType callb);
-  void removeCallback(void);
 
   const char *topic;
   uint8_t qos;
@@ -313,10 +299,6 @@ public:
   // ensure nul terminating lastread.
   uint16_t datalen;
 
-  SubscribeCallbackUInt32Type callback_uint32t;
-  SubscribeCallbackDoubleType callback_double;
-  SubscribeCallbackBufferType callback_buffer;
-  SubscribeCallbackIOType callback_io;
 
   AdafruitIO_MQTT *io_mqtt;
 

@@ -478,26 +478,7 @@ void Adafruit_MQTT::processPackets(int16_t timeout) {
 
   while (elapsed < (uint32_t)timeout) {
     Adafruit_MQTT_Subscribe *sub = readSubscription(timeout - elapsed);
-    if (sub) {
-      if (sub->callback_uint32t != NULL) {
-        // huh lets do the callback in integer mode
-        uint32_t data = 0;
-        data = atoi((char *)sub->lastread);
-        sub->callback_uint32t(data);
-      } else if (sub->callback_double != NULL) {
-        // huh lets do the callback in doublefloat mode
-        double data = 0;
-        data = atof((char *)sub->lastread);
-        sub->callback_double(data);
-      } else if (sub->callback_buffer != NULL) {
-        // huh lets do the callback in buffer mode
-        sub->callback_buffer((char *)sub->lastread, sub->datalen);
-      } else if (sub->callback_io != NULL) {
-        // huh lets do the callback in io mode
-        ((sub->io_mqtt)->*(sub->callback_io))((char *)sub->lastread,
-                                              sub->datalen);
-      }
-    }
+
 
     // keep track over elapsed time
     endtime = millis();
@@ -935,36 +916,6 @@ Adafruit_MQTT_Subscribe::Adafruit_MQTT_Subscribe(Adafruit_MQTT *mqttserver,
   topic = feed;
   qos = q;
   datalen = 0;
-  callback_uint32t = 0;
-  callback_buffer = 0;
-  callback_double = 0;
-  callback_io = 0;
   io_mqtt = 0;
   new_message = false;
-}
-
-void Adafruit_MQTT_Subscribe::setCallback(SubscribeCallbackUInt32Type cb) {
-  callback_uint32t = cb;
-}
-
-void Adafruit_MQTT_Subscribe::setCallback(SubscribeCallbackDoubleType cb) {
-  callback_double = cb;
-}
-
-void Adafruit_MQTT_Subscribe::setCallback(SubscribeCallbackBufferType cb) {
-  callback_buffer = cb;
-}
-
-void Adafruit_MQTT_Subscribe::setCallback(AdafruitIO_MQTT *io,
-                                          SubscribeCallbackIOType cb) {
-  callback_io = cb;
-  io_mqtt = io;
-}
-
-void Adafruit_MQTT_Subscribe::removeCallback(void) {
-  callback_uint32t = 0;
-  callback_buffer = 0;
-  callback_double = 0;
-  callback_io = 0;
-  io_mqtt = 0;
 }
