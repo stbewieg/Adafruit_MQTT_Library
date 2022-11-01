@@ -158,6 +158,8 @@ Adafruit_MQTT::Adafruit_MQTT(const char *server, uint16_t port,
   keepAliveInterval = MQTT_CONN_KEEPALIVE;
 
   packet_id_counter = 0;
+    DEBUG_PRINTLN(servername);
+
 }
 
 int8_t Adafruit_MQTT::connect() {
@@ -542,7 +544,7 @@ Adafruit_MQTT_Subscribe *Adafruit_MQTT::handleSubscriptionPacket(uint16_t len) {
   if (!len) {
     return NULL; // No data available, just quit.
   }
-  DEBUG_PRINT("Packet len: ");
+  DEBUG_PRINT(F("Packet len: "));
   DEBUG_PRINTLN(len);
   DEBUG_PRINTBUFFER(buffer, len);
 
@@ -557,32 +559,24 @@ Adafruit_MQTT_Subscribe *Adafruit_MQTT::handleSubscriptionPacket(uint16_t len) {
   uint16_t const topicoffset = packetAdditionalLen(len);
   uint16_t const topicstart = topicoffset + 4;
   topiclen = buffer[3 + topicoffset];
+  if (topiclen > TOPICLEN)
+  {
+      DEBUG_PRINTLN(F("IN TOPIC to Long"));
+      return NULL;
+  }
   DEBUG_PRINT(F("Looking for subscription len "));
   DEBUG_PRINTLN(topiclen);
 
   // Find subscription associated with this packet.
-  for (i = 0; i < MAXSUBSCRIPTIONS; i++) {
+  i =0;
     if (subscriptions[i]) {
-      // Skip this subscription if its name length isn't the same as the
-      // received topic name.
-      if (strlen(subscriptions[i]->topic) != topiclen)
-        continue;
-      // Stop if the subscription topic matches the received topic. Be careful
-      // to make comparison case insensitive.
-      if (strncasecmp((char *)buffer + topicstart, subscriptions[i]->topic,
-                      topiclen) == 0) {
-        DEBUG_PRINT(F("Found sub #"));
-        DEBUG_PRINTLN(i);
         if (subscriptions[i]->new_message) {
-          DEBUG_PRINTLN(F("Lost previous message"));
+            DEBUG_PRINTLN(F("Lost previous message"));
         } else {
-          subscriptions[i]->new_message = true;
+            subscriptions[i]->new_message = true;
         }
-
-        break;
-      }
     }
-  }
+
   if (i == MAXSUBSCRIPTIONS)
     return NULL; // matching sub not found ???
 
@@ -606,6 +600,11 @@ Adafruit_MQTT_Subscribe *Adafruit_MQTT::handleSubscriptionPacket(uint16_t len) {
   // extract out just the data, into the subscription object itself
   memmove(subscriptions[i]->lastread,
           buffer + topicstart + topiclen + packet_id_len, datalen);
+    memmove(subscriptions[i]->lastreadTopic,
+            buffer + topicstart + packet_id_len, topiclen);
+    if(TOPICLEN >= topiclen)
+        subscriptions[i]->lastreadTopic[topiclen] = '\0';
+
   subscriptions[i]->datalen = datalen;
   DEBUG_PRINT(F("Data len: "));
   DEBUG_PRINTLN(datalen);
