@@ -120,8 +120,8 @@
 // how much data we save in a subscription object
 // and how many subscriptions we want to be able to track.
 #if defined(__AVR_ATmega32U4__) || defined(__AVR_ATmega328P__)
-#define MAXSUBSCRIPTIONS 5
-#define SUBSCRIPTIONDATALEN 20
+#define MAXSUBSCRIPTIONS 1
+#define SUBSCRIPTIONDATALEN 10
 #define TOPICLEN 16
 #else
 #define MAXSUBSCRIPTIONS 16
@@ -218,6 +218,7 @@ public:
 
     // Ping the server to ensure the connection is still alive.
     bool ping(uint8_t n = 1);
+    uint8_t lost = 0;
 
 protected:
     // Interface that subclasses need to implement:
